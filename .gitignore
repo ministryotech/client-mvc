@@ -3,3 +3,6 @@ node_modules
 npm-debug.log
 client-mvc-min.js
 *.js.map
+ClientMVC/client-mvc.min.js
+*.nupkg
+deploy/content/*

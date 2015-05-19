@@ -98,7 +98,7 @@
         
         var Surrogate = function(){ this.constructor = child; };
         Surrogate.prototype = parent.prototype;
-        child.prototype = new Surrogate;
+        child.prototype = new Surrogate();
         
         if (protoProps) _.extend(child.prototype, protoProps);
         
@@ -166,7 +166,7 @@
             
         renderView : function(view) {
             if (!this.isAvailable()) {
-                if (this.parentRegion != null && this.parentView != null) {
+                if (this.parentRegion !== null && this.parentView !== null) {
                     this.parentRegion.renderView(this.parentView);
                 }  
             }
@@ -240,7 +240,7 @@
         },
         
         showView : function(view) {
-            if (view != undefined && view != null) {
+            if (view !== undefined && view !== null) {
                 this.view = view;
             }
             
@@ -413,14 +413,14 @@
             var idx = 0;
             for (idx = 0; idx < this.events.length; ++idx) {
                 this.events[idx].bind();
-            };
+            }
         },
         
         clearEvents : function () {
             var idx = 0;
             for (idx = 0; idx < this.events.length; ++idx) {
                 this.events[idx].clear();
-            };
+            }
         },
             
         renderContent : function() {

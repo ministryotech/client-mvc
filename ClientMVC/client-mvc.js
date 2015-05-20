@@ -2,7 +2,7 @@
 /* global define */
 
 /*
-    CLIENT MVC JS 0.5.1
+    CLIENT MVC JS 0.5.2
     -------------------
     Lightweight MVC framework for Javascript with it's roots in Backbone.
     The opposite of my similar backbone-ribs project, the intention is to create a framework without the strict REST model
@@ -285,7 +285,7 @@
                 
             });
             
-        All of the properties of the base controller defined here can be overridden as indicated in the sample region defined above. The
+        All of the properties of the base controller defined here can be overridden as indicated in the sample controller defined above. The
         'isAuthenticated()' method MUST be overridden. Each of these properties has a specific purpose...
         
         name : This is for debugging purposes only and indicates which view you are using - populating this will make identifying where
@@ -329,7 +329,7 @@
                 
             });
             
-        All of the properties of the base controller defined here can be overridden as indicated in the sample region defined above.
+        All of the properties of the base controller defined here can be overridden as indicated in the sample defined above.
         
         name : This is for debugging purposes only and indicates which view you are using - populating this will make identifying where
                errors occur far easier.
@@ -379,7 +379,7 @@
                 new ClientMVC.View.Event($('#logout-button'), 'click', myView.prototype.logOut)
             ];
             
-        All of the properties of the base controller defined here can be overridden as indicated in the sample region defined above. If the
+        All of the properties of the base view defined here can be overridden as indicated in the sample view defined above. If the
         template needs to be processed with data then the 'renderContent()' method must be replaced in the child class.
         
         name : This is for debugging purposes only and indicates which view you are using - populating this will make identifying where
@@ -467,7 +467,7 @@
 
 
     // Version
-    ClientMVC.VERSION = "0.5.1";
+    ClientMVC.VERSION = "0.5.2";
 
     return ClientMVC;
 }));

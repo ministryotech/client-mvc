@@ -2,7 +2,7 @@
 /* global define */
 
 /*
-    CLIENT MVC JS 0.5.2
+    CLIENT MVC JS 0.5.4
     -------------------
     Lightweight MVC framework for Javascript with it's roots in Backbone.
     The opposite of my similar backbone-ribs project, the intention is to create a framework without the strict REST model
@@ -178,7 +178,7 @@
             $(this.container).html(view.renderContent());
             view.bindEvents();
             this.currentView = view;
-            return this;
+            return this.currentView;
         },
         
         disposeView : function() {
@@ -410,6 +410,7 @@
         
         name : 'view',
         template : '<p>This is the default template - You will want to override this!</p>',
+        data : null,
         
         events : [],
         
@@ -424,6 +425,17 @@
             var idx = 0;
             for (idx = 0; idx < this.events.length; ++idx) {
                 this.events[idx].clear();
+            }
+        },
+        
+        getDataObject : function() {
+            // data could be an object or a function depending on when it needs to be accessed.
+            if (Object.exists(this.data)) {
+                if (Object.isFunction(this.data)) {
+                    return this.data();
+                } else {
+                    return this.data;
+                }
             }
         },
             
@@ -467,7 +479,7 @@
 
 
     // Version
-    ClientMVC.VERSION = "0.5.2";
+    ClientMVC.VERSION = "0.5.4";
 
     return ClientMVC;
 }));

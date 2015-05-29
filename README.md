@@ -169,6 +169,10 @@ A sample view could look something like this...
         
     });
     
+    myView.prototype.renderContent = function() {
+        MyTemplateEngine.html(this.template, this.getDataObject();
+    };
+    
     myView.prototype.logOut = function(e) {
         e.preventDefault();
         MYAPP.Controllers.Auth.logOut();
@@ -182,8 +186,10 @@ All of the properties of the base view can be overridden as indicated in the sam
 
 * name : This is for debugging purposes only and indicates which view you are using - populating this will make identifying where errors occur far easier.
 * template: This is the template content for the view to process. This could be a piece of static HTML or it could be a fragment in a file, using a templating engine like Mustache or Handlebars.
+* data: This is the JSON data or a function that returns JSON data to power the view and can be null.
 * events: This is an array of ClientMVC.View.Event objects (see below) which map defined elements in the template.
 
+* getDataObject(): The data object from View.data as an object fully loaded. Should be called by renderContent();
 * bindEvents(): Goes through any events defined and binds them to the template. This method is called automatically by a region when it renders the view.
 * clearEvents(): Removes any existing event bindings on the view. This method is called automatically by a region when disposing of a view.
 * renderContent(): By default, this returns the template content as it stands. This is fine if the template is static HTML. If you need to process data with your view then this method should be overridden.

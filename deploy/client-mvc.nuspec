@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>client-mvc</id>
-    <version>0.5.2</version>
+    <version>0.5.4</version>
     <authors>The Ministry of Technology</authors>
     <owners>The Ministry of Technology</owners>
     <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
@@ -11,7 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>A lightweight client MVC framework for building small Single Page Applications in Javascript.</summary>
     <description>A lightweight client MVC framework for building small Single Page Applications in Javascript. Based on some of the principles that drive Backbone it's an ideal lightweight solution for people either familiar with Backbone or wanting to start learning it.</description>
-    <releaseNotes>Documentation and usage updates.</releaseNotes>
+    <releaseNotes>Fix for return value on regions not returning the view and additional method for data duality on views.</releaseNotes>
     <copyright>Copyright 2015 Minotech Ltd T/A The Ministry of Technology</copyright>
     <tags>Javascript Backbone MVC SPA Simple Lightweight View Region Model JSON RequireJS</tags>
     <dependencies>

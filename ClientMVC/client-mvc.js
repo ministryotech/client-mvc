@@ -2,7 +2,7 @@
 /* global define */
 
 /*
-    CLIENT MVC JS 0.5.4
+    CLIENT MVC JS 0.5.5
     -------------------
     Lightweight MVC framework for Javascript with it's roots in Backbone.
     The opposite of my similar backbone-ribs project, the intention is to create a framework without the strict REST model
@@ -176,6 +176,7 @@
             }
             
             $(this.container).html(view.renderContent());
+            view.postRender();
             view.bindEvents();
             this.currentView = view;
             return this.currentView;
@@ -394,6 +395,7 @@
                        a view;
         renderContent(): By default, this returns the template content as it stands. This is fine if the template is static HTML. If you need
                          to process data with your view then this method should be overridden.
+        postRender(): By default, this does nothing but when overridden this is called by the rendering view after render has completed.
                          
         ClientMVC.View.Elements: This namespace is created here so that elements for each view can be appended to it for reference elsewhere
                                  in the custom view code. Elements would potentially look like this but are entirely optional...
@@ -417,14 +419,14 @@
         bindEvents : function () {
             var idx = 0;
             for (idx = 0; idx < this.events.length; ++idx) {
-                this.events[idx].bind();
+                this.events[idx].bindEvent();
             }
         },
         
         clearEvents : function () {
             var idx = 0;
             for (idx = 0; idx < this.events.length; ++idx) {
-                this.events[idx].clear();
+                this.events[idx].clearEvent();
             }
         },
         
@@ -441,6 +443,10 @@
             
         renderContent : function() {
             return this.template;
+        },
+        
+        postRender : function() {
+            
         }
     });
     
@@ -457,7 +463,7 @@
         are not overridden they are just created using 'new ClientMVC.View.Event()' and passing in a jQuery selector for the item, 
         the name of the event and the function to execute when the event occurs.
             
-        An event has methods for bind and clear. These methods are called by the view that the event belongs to automatically by the
+        An event has methods for bindEvent and clearEvent. These methods are called by the view that the event belongs to automatically by the
         view's bind and clear methods (which are, in turn, called by the region).
     */
     ClientMVC.View.Event = function(selector, eventName, eventFunc) {
@@ -468,18 +474,18 @@
     
     _.extend(ClientMVC.View.Event.prototype, {
         
-        bind : function () {
+        bindEvent : function () {
             $(this.selector).on(this.eventName, this.eventFunc);
         },
         
-        clear : function () {
+        clearEvent : function () {
             $(this.selector).off(this.eventName);
         }
     });
 
 
     // Version
-    ClientMVC.VERSION = "0.5.4";
+    ClientMVC.VERSION = "0.5.5";
 
     return ClientMVC;
 }));

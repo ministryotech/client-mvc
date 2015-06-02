@@ -193,6 +193,7 @@ All of the properties of the base view can be overridden as indicated in the sam
 * bindEvents(): Goes through any events defined and binds them to the template. This method is called automatically by a region when it renders the view.
 * clearEvents(): Removes any existing event bindings on the view. This method is called automatically by a region when disposing of a view.
 * renderContent(): By default, this returns the template content as it stands. This is fine if the template is static HTML. If you need to process data with your view then this method should be overridden.
+* postRender(): By default, this does nothing but when overridden this is called by the rendering view after render has completed.
 
 #### ClientMVC.View.Elements ####
 This namespace is created in Client MVC so that elements for each view can be appended to it for reference elsewhere in the custom view code. Elements would potentially look like this but are entirely optional...

@@ -1,7 +1,7 @@
 {
   "name": "client-mvc",
   "author": "The Ministry Of Technology",
-  "version": "0.5.6",
+  "version": "0.6.0",
   "description": "A lightweight client MVC framework for building small Single Page Applications in Javascript with it's roots in Backbone.",
   "repository": {
     "type": "git",

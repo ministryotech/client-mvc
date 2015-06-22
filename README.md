@@ -7,7 +7,6 @@ A Lightweight MVC framework for Javascript with it's roots in Backbone.
 The opposite of my similar backbone-ribs project, the intention is to create a framework without the strict REST model dependencies of Backbone that is focussed on view management, leaving data access up to the framework user to do as they see fit. Models in Client MVC are regarded as simple dumb objects for the most part and can be basic JSON responses, the implementation of which is in your hands (hence why there are no base Model or Collection objects). Instead, Client MVC makes heavy use of controller classes which are expected to call data access methods to obtain data which can then be returned in either a custom form or as raw JSON.
 
 #### Known Issues ####
-* Currently routing is not supported - If you want a routed SPA I recommend checking out Backbone along with my Backbone Ribs project for a view state managed implementation of backbone.
 * This is still a heavy beta project
 
 #### Dependencies ####

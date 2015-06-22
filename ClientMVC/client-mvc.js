@@ -505,9 +505,37 @@ if (!Function.prototype.bind) { // check if native implementation available
     /*
         ROUTER: The routing system.
         -----------------------------------------------------
-        Routers map faux-URLs to actions, and fire events when routes are matched. Creating a new one sets its `routes` hash, if not set statically.
+        Routers map faux-URLs to actions, and fire events when routes are matched..
         
         The router and history sections are largely lifted from Backbone but are almost entirely untested at this stage. Feedback is welcome.
+        
+        A sample router could look something like this...
+        
+            var router = ClientMVC.Router.extend({
+            
+                name : 'my router',
+                
+                init : function() {
+                    // Do some auth stuff here
+                },
+    
+                routes: [
+                    new ClientMVC.Router.Route('search/:query/p:num', function(query, num) {
+                        alert(query);
+                    	alert(num);
+                    }, 'searchRoute'),
+                    new ClientMVC.Router.Route('home', function() {
+                        alert('You are home');
+                    }, 'homeRoute'),
+                    new ClientMVC.Router.Route('away', function() {
+                        alert('You are away');
+                    }, 'awayRoute'),
+                    new ClientMVC.Router.Route('*action', function(action) {
+                        alert('You are at ' + action);
+                    }, 'defaultRoute')
+                ]
+                
+            });
     */
     ClientMVC.Router = function(options) {
         options || (options = {});
@@ -526,37 +554,36 @@ if (!Function.prototype.bind) { // check if native implementation available
 
     // Set up all inheritable ClientMVC.Router properties and methods.
     _.extend(ClientMVC.Router.prototype, {
+        
+        name: 'router',
     
         // Init is an empty function by default. Override it with your own initialization logic.
         init: function(){
         },
         
         // Manually bind a single named route to a callback. For example:
-        //     this.route('search/:query/p:num', 'search', function(query, num) {
+        //     this.route(new ClientMVC.Router.Route('search/:query/p:num', function(query, num) {
         //       ...
-        //     });
-        route: function(route, name, callback) {
-            if (!_.isRegExp(route)) route = this._routeToRegExp(route);
-            if (Object.isFunction(name)) {
-                callback = name;
-                name = '';
-            }
-            if (!callback) callback = this[name];
+        //     }, 'searchRoute');
+        route: function(routeObj) {
+            if (!_.isRegExp(routeObj.route)) routeObj.route = this._routeToRegExp(routeObj.route);
+            if (!Object.exists(routeObj.callback)) throw 'No route destination defined';
             var router = this;
-            ClientMVC.history.route(route, function(fragment) {
-                var args = router._extractParameters(route, fragment);
-                if (router.execute(callback, args, name) !== false) {
-                    router.trigger.apply(router, ['route:' + name].concat(args));
-                    router.trigger('route', name, args);
-                    ClientMVC.history.trigger('route', router, name, args);
-                }
+            ClientMVC.history.route(routeObj.route, function(fragment) {
+                var args = router._extractParameters(routeObj.route, fragment);
+                router.execute(routeObj.callback, args, name);
             });
             return this;
         },
         
         // Execute a route handler with the provided parameters.  This is an excellent place to do pre-route setup or post-route cleanup.
         execute: function(callback, args, name) {
-          if (callback) callback.apply(this, args);
+          if (callback) { 
+              callback.apply(this, args);
+              return true;
+          } else {
+              return false;
+          }
         },
         
         // Simple proxy to `ClientMVC.history` to save a fragment into the history.
@@ -572,7 +599,7 @@ if (!Function.prototype.bind) { // check if native implementation available
             this.routes = _.result(this, 'routes');
             var route, routes = _.keys(this.routes);
             while ((route = routes.pop()) != null) {
-                this.route(route, this.routes[route]);
+                this.route(this.routes[route]);
             }
         },
         
@@ -599,6 +626,20 @@ if (!Function.prototype.bind) { // check if native implementation available
         }
     
     });
+    
+    ClientMVC.Router.extend = extend;
+    
+    
+    /*
+        ROUTE: The routes to feed the routing system
+        -----------------------------------------------------
+        ClientMVC routes are simple objects like events are that the router uses for mapping.
+    */
+    ClientMVC.Router.Route = function(route, callback, name) {
+        this.name = name || '';
+        this.route = route;
+        this.callback = callback;
+    };
     
     
     /*
@@ -634,6 +675,8 @@ if (!Function.prototype.bind) { // check if native implementation available
     
     // Set up all inheritable ClientMVC.History properties and methods.
     _.extend(ClientMVC.History.prototype, {
+        
+        name: 'history',
         
         // The default interval to poll for hash changes, if necessary, is twenty times a second.
         interval: 50,
@@ -781,7 +824,7 @@ if (!Function.prototype.bind) { // check if native implementation available
         
         // Add a route to be tested when the fragment changes. Routes added later may override previous routes.
         route: function(route, callback) {
-            this.handlers.unshift({route: route, callback: callback});
+            this.handlers.unshift({ route : route, callback : callback });
         },
         
         // Checks the current URL to see if it has changed, and if it has, calls `loadUrl`, normalizing across the hidden iframe.

@@ -2,7 +2,7 @@
 /* global define */
 
 /*
-    CLIENT MVC JS 0.5.5
+    CLIENT MVC JS 0.5.6
     -------------------
     Lightweight MVC framework for Javascript with it's roots in Backbone.
     The opposite of my similar backbone-ribs project, the intention is to create a framework without the strict REST model
@@ -77,6 +77,18 @@
     if (!String.prototype.replaceAll) {
         String.prototype.replaceAll = function(find, replace) { return this.replace(new RegExp(find.escapeRegExp(), 'g'), replace); };
     }
+    
+    // The .bind method from Prototype.js 
+if (!Function.prototype.bind) { // check if native implementation available
+  Function.prototype.bind = function(){ 
+    var fn = this, args = Array.prototype.slice.call(arguments),
+        object = args.shift(); 
+    return function(){ 
+      return fn.apply(object, 
+        args.concat(Array.prototype.slice.call(arguments))); 
+    }; 
+  };
+}
 
     /*
         Extend method.
@@ -414,12 +426,14 @@
         template : '<p>This is the default template - You will want to override this!</p>',
         data : null,
         
+        elements : {},
+        
         events : [],
         
         bindEvents : function () {
             var idx = 0;
             for (idx = 0; idx < this.events.length; ++idx) {
-                this.events[idx].bindEvent();
+                this.events[idx].bindEvent(this);
             }
         },
         
@@ -474,8 +488,12 @@
     
     _.extend(ClientMVC.View.Event.prototype, {
         
-        bindEvent : function () {
-            $(this.selector).on(this.eventName, this.eventFunc);
+        bindEvent : function (context) {
+            if (Object.exists(context)) {
+                $(this.selector).on(this.eventName, this.eventFunc.bind(context));
+            } else {
+                $(this.selector).on(this.eventName, this.eventFunc);
+            }
         },
         
         clearEvent : function () {
@@ -485,7 +503,7 @@
 
 
     // Version
-    ClientMVC.VERSION = "0.5.5";
+    ClientMVC.VERSION = "0.5.6";
 
     return ClientMVC;
 }));

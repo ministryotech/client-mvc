@@ -2,7 +2,7 @@
 /* global define */
 
 /*
-    CLIENT MVC JS 0.6.0
+    CLIENT MVC JS 0.9.0
     -------------------
     Lightweight MVC framework for Javascript with it's roots in Backbone.
     The opposite of my similar backbone-ribs project, the intention is to create a framework without the strict REST model
@@ -507,7 +507,7 @@ if (!Function.prototype.bind) { // check if native implementation available
         -----------------------------------------------------
         Routers map faux-URLs to actions, and fire events when routes are matched..
         
-        The router and history sections are largely lifted from Backbone but are almost entirely untested at this stage. Feedback is welcome.
+        The router and history sections are based on Backbone. Feedback is welcome.
         
         A sample router could look something like this...
         
@@ -520,9 +520,14 @@ if (!Function.prototype.bind) { // check if native implementation available
                 },
     
                 routes: [
-                    new ClientMVC.Router.Route('search/:query/p:num', function(query, num) {
+                    new ClientMVC.Router.Route('search/*query', function(query) {
                         alert(query);
-                    	alert(num);
+                    }, 'searchRoute'),
+                    new ClientMVC.Router.Route('posts/:id', function(id) {
+                        alert(id);
+                    }, 'searchRoute'),
+                    new ClientMVC.Router.Route('posts/:id/:pref', function(id, pref) {
+                        alert(id + ' Ordered from ' + pref);
                     }, 'searchRoute'),
                     new ClientMVC.Router.Route('home', function() {
                         alert('You are home');
@@ -538,9 +543,9 @@ if (!Function.prototype.bind) { // check if native implementation available
             });
     */
     ClientMVC.Router = function(options) {
-        options || (options = {});
+        options = options || {};
         if (options.routes) this.routes = options.routes;
-        this._bindRoutes();
+        this.bindRoutes();
         this.init(options);
     };
 
@@ -566,11 +571,11 @@ if (!Function.prototype.bind) { // check if native implementation available
         //       ...
         //     }, 'searchRoute');
         route: function(routeObj) {
-            if (!_.isRegExp(routeObj.route)) routeObj.route = this._routeToRegExp(routeObj.route);
+            if (!_.isRegExp(routeObj.route)) routeObj.route = this.routeToRegExp(routeObj.route);
             if (!Object.exists(routeObj.callback)) throw 'No route destination defined';
             var router = this;
             ClientMVC.history.route(routeObj.route, function(fragment) {
-                var args = router._extractParameters(routeObj.route, fragment);
+                var args = router.extractParameters(routeObj.route, fragment);
                 router.execute(routeObj.callback, args, name);
             });
             return this;
@@ -594,17 +599,17 @@ if (!Function.prototype.bind) { // check if native implementation available
         
         // Bind all defined routes to `ClientMVC.history`. We have to reverse the order of the routes here to support behavior where the most general
         // routes can be defined at the bottom of the route map.
-        _bindRoutes: function() {
+        bindRoutes: function() {
             if (!this.routes) return;
             this.routes = _.result(this, 'routes');
             var route, routes = _.keys(this.routes);
-            while ((route = routes.pop()) != null) {
+            while (Object.exists(route = routes.pop())) {
                 this.route(this.routes[route]);
             }
         },
         
         // Convert a route string into a regular expression, suitable for matching against the current location hash.
-        _routeToRegExp: function(route) {
+        routeToRegExp: function(route) {
             route = route.replace(routex.escapeRegExp, '\\$&')
                        .replace(routex.optionalParam, '(?:$1)?')
                        .replace(routex.namedParam, function(match, optional) {
@@ -616,7 +621,7 @@ if (!Function.prototype.bind) { // check if native implementation available
         
         // Given a route, and a URL fragment that it matches, return the array of extracted decoded parameters. Empty or unmatched parameters will be
         // treated as `null` to normalize cross-browser behavior.
-        _extractParameters: function(route, fragment) {
+        extractParameters: function(route, fragment) {
             var params = route.exec(fragment).slice(1);
             return _.map(params, function(param, i) {
                 // Don't decode the search params.
@@ -649,7 +654,7 @@ if (!Function.prototype.bind) { // check if native implementation available
         [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments. If the browser supports neither (old IE, natch),
         falls back to polling.
         
-        The router and history sections are largely lifted from Backbone but are almost entirely untested at this stage. Feedback is welcome.
+        The router and history sections are based on Backbone. Feedback is welcome.
     */
 
     ClientMVC.History = function() {
@@ -722,8 +727,8 @@ if (!Function.prototype.bind) { // check if native implementation available
         
         // Get the cross-browser normalized URL fragment from the path or hash.
         getFragment: function(fragment) {
-            if (fragment == null) {
-                if (this._usePushState || !this._wantsHashChange) {
+            if (Object.exists(fragment)) {
+                if (this.usePushState || !this.wantsHashChange) {
                     fragment = this.getPath();
                 } else {
                     fragment = this.getHash();
@@ -740,26 +745,26 @@ if (!Function.prototype.bind) { // check if native implementation available
             // Figure out the initial configuration. Do we need an iframe? Is pushState desired ... is it available?
             this.options          = _.extend({root: '/'}, this.options, options);
             this.root             = this.options.root;
-            this._wantsHashChange = this.options.hashChange !== false;
-            this._hasHashChange   = 'onhashchange' in window;
-            this._useHashChange   = this._wantsHashChange && this._hasHashChange;
-            this._wantsPushState  = !!this.options.pushState;
-            this._hasPushState    = !!(this.history && this.history.pushState);
-            this._usePushState    = this._wantsPushState && this._hasPushState;
+            this.wantsHashChange = this.options.hashChange !== false;
+            this.hasHashChange   = 'onhashchange' in window;
+            this.useHashChange   = this.wantsHashChange && this.hasHashChange;
+            this.wantsPushState  = !!this.options.pushState;
+            this.hasPushState    = !!(this.history && this.history.pushState);
+            this.usePushState    = this.wantsPushState && this.hasPushState;
             this.fragment         = this.getFragment();
             
             // Normalize root to always include a leading and trailing slash.
             this.root = ('/' + this.root + '/').replace(histex.rootStripper, '/');
             
             // Transition from hashChange to pushState or vice versa if both are requested.
-            if (this._wantsHashChange && this._wantsPushState) {
-                if (!this._hasPushState && !this.atRoot()) {
+            if (this.wantsHashChange && this.wantsPushState) {
+                if (!this.hasPushState && !this.atRoot()) {
                     // If we've started off with a route from a `pushState`-enabled browser, but we're currently in a browser that doesn't support it...
                     var root = this.root.slice(0, -1) || '/';
                     this.location.replace(root + '#' + this.getPath());
                     // Return immediately as browser will do redirect to new url
                     return true;
-                } else if (this._hasPushState && this.atRoot()) {
+                } else if (this.hasPushState && this.atRoot()) {
                     // Or if we've started out with a hash-based route, but we're currently in a browser where it could be `pushState`-based instead...
                     this.navigate(this.getHash(), {replace: true});
                 }
@@ -767,9 +772,11 @@ if (!Function.prototype.bind) { // check if native implementation available
         
             // Proxy an iframe to handle location events if the browser doesn't support the `hashchange` event, HTML5 history, or the user wants
             // `hashChange` but not `pushState`.
-            if (!this._hasHashChange && this._wantsHashChange && !this._usePushState) {
+            if (!this.hasHashChange && this.wantsHashChange && !this.usePushState) {
                 this.iframe = document.createElement('iframe');
+                /* jshint scripturl: true */
                 this.iframe.src = 'javascript:0';
+                /* jshint scripturl: false */
                 this.iframe.style.display = 'none';
                 this.iframe.tabIndex = -1;
                 var body = document.body;
@@ -786,12 +793,12 @@ if (!Function.prototype.bind) { // check if native implementation available
             };
         
             // Depending on whether we're using pushState or hashes, and whether 'onhashchange' is supported, determine how we check the URL state.
-            if (this._usePushState) {
+            if (this.usePushState) {
                 addEventListener('popstate', this.checkUrl, false);
-            } else if (this._useHashChange && !this.iframe) {
+            } else if (this.useHashChange && !this.iframe) {
                 addEventListener('hashchange', this.checkUrl, false);
-            } else if (this._wantsHashChange) {
-                this._checkUrlInterval = setInterval(this.checkUrl, this.interval);
+            } else if (this.wantsHashChange) {
+                this.checkUrlInterval = setInterval(this.checkUrl, this.interval);
             }
             
             if (!this.options.silent) return this.loadUrl();
@@ -805,9 +812,9 @@ if (!Function.prototype.bind) { // check if native implementation available
             };
         
             // Remove window listeners.
-            if (this._usePushState) {
+            if (this.usePushState) {
                 removeEventListener('popstate', this.checkUrl, false);
-            } else if (this._useHashChange && !this.iframe) {
+            } else if (this.useHashChange && !this.iframe) {
                 removeEventListener('hashchange', this.checkUrl, false);
             }
         
@@ -818,7 +825,7 @@ if (!Function.prototype.bind) { // check if native implementation available
             }
         
             // Some environments will throw when clearing an undefined interval.
-            if (this._checkUrlInterval) clearInterval(this._checkUrlInterval);
+            if (this.checkUrlInterval) clearInterval(this.checkUrlInterval);
             ClientMVC.History.started = false;
         },
         
@@ -880,12 +887,12 @@ if (!Function.prototype.bind) { // check if native implementation available
             if (this.fragment === fragment) return;
             this.fragment = fragment;
             
-            if (this._usePushState) {
+            if (this.usePushState) {
                 // If pushState is available, we use it to set the fragment as a real URL.
                 this.history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);    
-            } else if (this._wantsHashChange) {
+            } else if (this.wantsHashChange) {
                 // If hash changes haven't been explicitly disabled, update the hash fragment to store history.
-                this._updateHash(this.location, fragment, options.replace);
+                this.updateHash(this.location, fragment, options.replace);
                 if (this.iframe && (fragment !== this.getHash(this.iframe.contentWindow))) {
                     var iWindow = this.iframe.contentWindow;
                 
@@ -896,7 +903,7 @@ if (!Function.prototype.bind) { // check if native implementation available
                         iWindow.document.close();
                     }
                 
-                    this._updateHash(iWindow.location, fragment, options.replace);
+                    this.updateHash(iWindow.location, fragment, options.replace);
                 }
             } else {
                 // If you've told us that you explicitly don't want fallback hashchange-based history, then `navigate` becomes a page refresh.
@@ -907,7 +914,7 @@ if (!Function.prototype.bind) { // check if native implementation available
         },
         
         // Update the hash location, either replacing the current entry, or adding a new one to the browser history.
-        _updateHash: function(location, fragment, replace) {
+        updateHash: function(location, fragment, replace) {
             if (replace) {
                 var href = location.href.replace(/(javascript:|#).*$/, '');
                 location.replace(href + '#' + fragment);
@@ -920,11 +927,11 @@ if (!Function.prototype.bind) { // check if native implementation available
     
 
     // Create the default History.
-    ClientMVC.history = new ClientMVC.History;
+    ClientMVC.history = new ClientMVC.History();
 
 
     // Version
-    ClientMVC.VERSION = "0.6.0";
+    ClientMVC.VERSION = "0.9.0";
 
     return ClientMVC;
 }));

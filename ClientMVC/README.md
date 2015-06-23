@@ -206,11 +206,67 @@ This namespace is created in Client MVC so that elements for each view can be ap
 VIEW LIFECYCLE: Client MVC views maintain their bindings and have specific methods to dispose all of the events they use. When used in conjunction with a Region, to represent the holding area for the view, these methods ensure that orphan views and events within a region are always removed when not used anymore preventing memory leaks.
 
 #### ClientMVC.View.Event ####
-An event represents an event handler for an item on the template, wrapping a jQuery style event.
+An event represents an event handler for an item on the template, wrapping a jQuery style event. When writing the event callback function the value 'this' is bound to the event as the parent object using prototype.bind().
 
 A sample event can be seen in the view documentation above. Unlike most of the other elements of Client MVC, events are not overridden they are just created using 'new ClientMVC.View.Event()' and passing in a jQuery selector for the item, the name of the event and the function to execute when the event occurs.
     
-An event has methods for bind and clear. These methods are called by the view that the event belongs to automatically by the view's bind and clear methods (which are, in turn, called by the region).
+An event has methods for bind and clear (called bindEvent and clearEvent). These methods are called by the view that the event belongs to automatically by the view's bind and clear methods (which are, in turn, called by the region).
+
+#### ClientMVC.Router ####
+The routing system. Routers map faux-URLs to actions, and fire events when routes are matched. The router and history sections in ClientMVC are based on Backbone.
+        
+A sample router could look something like this...    
+```
+    var router = ClientMVC.Router.extend({
+    
+        name : 'my router',
+        
+        init : function() {
+            // Do some auth stuff here
+        },
+
+        routes: [
+            new ClientMVC.Router.Route('search/*query', function(query) {
+                alert(query);
+            }, 'searchRoute'),
+            new ClientMVC.Router.Route('posts/:id', function(id) {
+                alert(id);
+            }, 'searchRoute'),
+            new ClientMVC.Router.Route('posts/:id/:pref', function(id, pref) {
+                alert(id + ' Ordered from ' + pref);
+            }, 'searchRoute'),
+            new ClientMVC.Router.Route('home', function() {
+                alert('You are home');
+            }, 'homeRoute'),
+            new ClientMVC.Router.Route('away', function() {
+                alert('You are away');
+            }, 'awayRoute'),
+            new ClientMVC.Router.Route('*action', function(action) {
+                alert('You are at ' + action);
+            }, 'defaultRoute')
+        ]
+        
+    });
+```
+For a routed app the router is a key component so you may wish to attach it yo your application's namespace.
+
+Many of the properties of the base router can be overridden as indicated in the sample view defined above. The routes array must be overridden in order to set up the routes themselves. It is unlikely that you would wish to override any of the other elements in most cases as it is nicely self contained. The router uses ClientMVC.History's default implementation (see below).
+
+#### ClientMVC.Router.Route ####
+A route is a simple object structure definition that represents a route. A route consists of a route, a callback and a name. The roter example above shows construction of Route objects.
+
+#### ClientMVC.History ####
+The History system handles the management of forward and back using hash change and / or push state. This functionality is lifted almost line for line from Backbone.
+
+The router uses the default history implementation of ClientMVC.history. If you override any functionality to create your own implementation of history it should be loaded in the same namespace to connect up to the rest of Client MVC as follows...
+```
+    ClientMVC.history = ClientMVC.History.extend({
+    
+        name : 'my history'
+    });
+```
+
+Cross-browser history management is based on either [pushState](http://diveintohtml5.info/history.html) and real URLs, or [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments. If the browser supports neither (old IE, natch) it falls back to polling.
 
 ### Javascript Functional Extensions ###
 As well as the core part of Client MVC itself, the library also adds the following global Javascript helpers to aid in creating more terse, readable code...
@@ -256,7 +312,7 @@ With RequireJS in use I use the following as a base RequireJS config (again assu
     });
 ```
 
-### Advanced USage Patterns ###
+### Advanced Usage Patterns ###
 For more complex products I recommend using a patter that allows you to create your own variation of the key Client MVC objects that extend the main object elements themselves. This allows for integration of client mvc updates while minimising the potential for breaking your code but allows you to slip in your own variations into the design for your own app.
 
 In a global scope object style a sample extended version of Client MVC may look something like this...
@@ -283,10 +339,18 @@ In a global scope object style a sample extended version of Client MVC may look 
             // Your customisation code here.
             
         });
+        
+        window.MyMVC.Router = window.ClientMVC.Router.extend({
+        
+            routes: [
+                // new routes here.
+            ]
+        
+        });
     })();
 ```
 
-Using RequireJS (which I wholeheartedly recommend fro SPA projects) it would look like this...
+Using RequireJS (which I wholeheartedly recommend for SPA projects) it would look like this...
 ```
 define(['client-mvc'],
     function(ClientMVC) {
@@ -302,13 +366,22 @@ define(['client-mvc'],
             // Your customisation code here.
             
         });
+        
+        var appRouter = ClientMVC.Router.extend({
+        
+            routes: [
+                // new routes here.
+            ]
+        
+        });
 
         return {
             Controller: ClientMVC.Controller,
             AuthController: ClientMVC.AuthController,
             SecuredController: exSecureController,
             View: ClientMVC.View,
-            Region: exRegion
+            Region: exRegion,
+            Router : appRouter
         };
     });
 ```

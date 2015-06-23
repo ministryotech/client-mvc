@@ -9,9 +9,14 @@ var TestRouter = ClientMVC.Router.extend({
     },
     
     routes: [
-        new ClientMVC.Router.Route('search/:query/p:num', function(query, num) {
+        new ClientMVC.Router.Route('search/*query', function(query) {
             alert(query);
-        	alert(num);
+        }, 'searchRoute'),
+        new ClientMVC.Router.Route('posts/:id', function(id) {
+            alert(id);
+        }, 'searchRoute'),
+        new ClientMVC.Router.Route('posts/:id/:pref', function(id, pref) {
+            alert(id + ' Ordered from ' + pref);
         }, 'searchRoute'),
         new ClientMVC.Router.Route('home', function() {
             alert('You are home');

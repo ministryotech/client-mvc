@@ -18,13 +18,13 @@ Client MVC currently exposes the following primary objects for building simple S
 #### ClientMVC.Controller ####
 A Controller is where your application's core logic, or the entry points to it, should be located. 
 Any class extending ClientMVC.Controller should ensure to call the replaced methods as follows...
-```
+
     ClientMVC.Controller.prototype.init(view, region);
-```
+
 In Client MVC a controller is reponsible for managing the content of a given region (or regions).
         
 A sample controller could look like this...
-```
+
     var coreController = MVC.Controller.extend({
     
         name : 'core controller',
@@ -38,7 +38,7 @@ A sample controller could look like this...
         }
         
     });
-```
+
 All of the properties of the base controller defined here can be overridden as indicated in the sample region defined above. Each of these properties has a specific purpose...
 
 * name : This is for debugging purposes only and indicates which view you are using - populating this will make identifying where errors occur far easier.
@@ -51,13 +51,13 @@ All of the properties of the base controller defined here can be overridden as i
 #### ClientMVC.AuthController ####
 An Auth Controller is a special type of controller that implements authentication. It's essentially your login controller whether the authentication process is user interractive or not. 
 Any class extending ClientMVC.AuthController should ensure to call the replaced methods as follows...
-```
+
     ClientMVC.AuthController.prototype.init(view, region);
-```
+
 An auth controller needs to implement an 'isAuthenticated()' method and optionally log in and log out features. It is responsible for handling the authentication of users and generating cookies and session data to ensure users are logged in.
         
 A sample controller could look something like this...
-```
+
     var loginController = ClientMVC.AuthController.extend({
 
        currentSession : null,
@@ -79,7 +79,7 @@ A sample controller could look something like this...
         logOut : function() {}
         
     });
-```
+
 All of the properties of the base controller can be overridden as indicated in the sample defined above. The 'isAuthenticated()' method MUST be overridden. Each of these properties has a specific purpose...
 
 * name : This is for debugging purposes only and indicates which view you are using - populating this will make identifying where errors occur far easier.
@@ -90,14 +90,14 @@ All of the properties of the base controller can be overridden as indicated in t
 #### ClientMVC.SecuredController ####
 A Secured Controller is a special type of controller which represents a controller where it's functionality is restricted by the authenticatin state of a provided Auth Controller (see above). 
 Any class extending ClientMVC.SecuredController should ensure to call the replaced methods as follows...
-```
+
     ClientMVC.SecuredController.prototype.init(view, region, authController);
-```
+
 A secured controller requires that an Auth Controller has been authenticated against in order to load. If authentication has failed or has not yet been made then the Secured Controller will redirect to the auth
 controller automatically.
 
 A sample controller could look something like this...
-```
+
     var secureController = ClientMVC.SecuredController.extend({
     
         name : 'my secure controller',
@@ -107,7 +107,7 @@ A sample controller could look something like this...
         }
         
     });
-```
+
 All of the properties of the base controller defined here can be overridden as indicated in the sample defined above.
 
 * name : This is for debugging purposes only and indicates which view you are using - populating this will make identifying where errors occur far easier.
@@ -124,14 +124,14 @@ Although the framework is lightweight and allows much variation; best practice w
 
 A Region is responsible for the rendering of any views within itself and triggering the binding and unbinding of any events.
 A sample region could look like this...
-```
+
     var coreRegion = MVC.Region.extend({
     
         name : 'core region',
         container: '#app-wrapper',
         
     });
-```     
+   
 All of the properties of the base region defined here can be overridden as indicated in the sample region defined above. Each of these properties has a specific purpose...
 
 * name : This is for debugging purposes only and indicates which view you are using - populating this will make identifying where errors occur far easier.
@@ -160,7 +160,7 @@ Although the framework is lightweight and allows much variation; best practice w
 A view implementation will contain key elements defined below and map elements through jQuery selectors to the associated template.
 
 A sample view could look something like this...
-```
+
     var myView = ClientMVC.View.extend({
         
         name : 'my view',
@@ -180,7 +180,7 @@ A sample view could look something like this...
     myView.prototype.events = [
         new ClientMVC.View.Event($('#logout-button'), 'click', myView.prototype.logOut)
     ];
-```
+
 All of the properties of the base view can be overridden as indicated in the sample view defined above. If the template needs to be processed with data then the 'renderContent()' method must be replaced in the child class.
 
 * name : This is for debugging purposes only and indicates which view you are using - populating this will make identifying where errors occur far easier.
@@ -196,13 +196,13 @@ All of the properties of the base view can be overridden as indicated in the sam
 
 #### ClientMVC.View.Elements ####
 This namespace is created in Client MVC so that elements for each view can be appended to it for reference elsewhere in the custom view code. Elements would potentially look like this but are entirely optional...
-```
+
     ClientMVC.View.Elements.MyView = {
         username : '#email',
         password : '#password',
         loginButton : '#form input[type=submit]'
     };
-```
+
 VIEW LIFECYCLE: Client MVC views maintain their bindings and have specific methods to dispose all of the events they use. When used in conjunction with a Region, to represent the holding area for the view, these methods ensure that orphan views and events within a region are always removed when not used anymore preventing memory leaks.
 
 #### ClientMVC.View.Event ####
@@ -216,7 +216,7 @@ An event has methods for bind and clear (called bindEvent and clearEvent). These
 The routing system. Routers map faux-URLs to actions, and fire events when routes are matched. The router and history sections in ClientMVC are based on Backbone.
         
 A sample router could look something like this...    
-```
+
     var router = ClientMVC.Router.extend({
     
         name : 'my router',
@@ -247,7 +247,7 @@ A sample router could look something like this...
         ]
         
     });
-```
+
 For a routed app the router is a key component so you may wish to attach it yo your application's namespace.
 
 Many of the properties of the base router can be overridden as indicated in the sample view defined above. The routes array must be overridden in order to set up the routes themselves. It is unlikely that you would wish to override any of the other elements in most cases as it is nicely self contained. The router uses ClientMVC.History's default implementation (see below).
@@ -259,12 +259,12 @@ A route is a simple object structure definition that represents a route. A route
 The History system handles the management of forward and back using hash change and / or push state. This functionality is lifted almost line for line from Backbone.
 
 The router uses the default history implementation of ClientMVC.history. If you override any functionality to create your own implementation of history it should be loaded in the same namespace to connect up to the rest of Client MVC as follows...
-```
+
     ClientMVC.history = ClientMVC.History.extend({
     
         name : 'my history'
     });
-```
+
 
 Cross-browser history management is based on either [pushState](http://diveintohtml5.info/history.html) and real URLs, or [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments. If the browser supports neither (old IE, natch) it falls back to polling.
 
@@ -287,16 +287,15 @@ Client MVC is designed to be used either traditionallly, exposing itself as a gl
 
 #### To set up as a Global scope object ####
 Add a reference to Client MVC and it's dependencies to your page as follows. Paths may vary, but the paths given here assume that the reference was obtained from NPM...
-```
-#!html
+
     <script src="node_modules/client-mvc/node_modules/underscore/underscore.js"></script>
     <script src="node_modules/client-mvc/client-mvc.js"></script>
-```
+
 Client MVC has an additional dependency on jQuery. This is not hardcoded into the NPM package to allow you to use the version of jQuery suited to your project and locate it where you like.
 
 #### To set up with RequireJS ####
 With RequireJS in use I use the following as a base RequireJS config (again assuming NPM paths)...
-```
+
     require.config({
         baseUrl: "{insert your app base url here - commonly empty, app/ or scripts/}",
         paths: {
@@ -310,13 +309,13 @@ With RequireJS in use I use the following as a base RequireJS config (again assu
             client-mvc: { deps: ['underscore', 'jquery'], exports: 'MVC' }
         }
     });
-```
+
 
 ### Advanced Usage Patterns ###
 For more complex products I recommend using a patter that allows you to create your own variation of the key Client MVC objects that extend the main object elements themselves. This allows for integration of client mvc updates while minimising the potential for breaking your code but allows you to slip in your own variations into the design for your own app.
 
 In a global scope object style a sample extended version of Client MVC may look something like this...
-```
+
     (function() {
     
         if (window.ClientMVC === undefined)
@@ -348,50 +347,48 @@ In a global scope object style a sample extended version of Client MVC may look 
         
         });
     })();
-```
+
 
 Using RequireJS (which I wholeheartedly recommend for SPA projects) it would look like this...
-```
-define(['client-mvc'],
-    function(ClientMVC) {
 
-        var exSecureController = ClientMVC.SecuredController.extend({
-            
-            // Your customisation code here
-            
-        });
+    define(['client-mvc'],
+        function(ClientMVC) {
 
-        var exRegion = ClientMVC.Region.extend({
-            
-            // Your customisation code here.
-            
-        });
-        
-        var appRouter = ClientMVC.Router.extend({
-        
-            routes: [
-                // new routes here.
-            ]
-        
-        });
+            var exSecureController = ClientMVC.SecuredController.extend({
 
-        return {
-            Controller: ClientMVC.Controller,
-            AuthController: ClientMVC.AuthController,
-            SecuredController: exSecureController,
-            View: ClientMVC.View,
-            Region: exRegion,
-            Router : appRouter
-        };
-    });
-```
+                // Your customisation code here
+
+            });
+
+            var exRegion = ClientMVC.Region.extend({
+
+                // Your customisation code here.
+
+            });
+
+            var appRouter = ClientMVC.Router.extend({
+
+                routes: [
+                    // new routes here.
+                ]
+
+            });
+
+            return {
+                Controller: ClientMVC.Controller,
+                AuthController: ClientMVC.AuthController,
+                SecuredController: exSecureController,
+                View: ClientMVC.View,
+                Region: exRegion,
+                Router : appRouter
+            };
+        });
 
 ## The Ministry of Technology Open Source Products ##
-Welcome to The Ministry of Technology open source products. All open source Ministry of Technology products are distributed under the MIT License for maximum re-usability. Details on more of our products and services can be found on our website at http://www.ministryotech.co.uk
+Welcome to The Ministry of Technology open source products. All open source Ministry of Technology products are distributed under the MIT License for maximum re-usability. Details on more of our products and services can be found on our website at http://www.minotech.co.uk
 
 Our other open source repositories can be found here...
 
-* [https://bitbucket.org/ministryotech](https://bitbucket.org/ministryotech)
 * [https://github.com/ministryotech](https://github.com/ministryotech)
 * [https://github.com/tiefling](https://github.com/tiefling)
 
@@ -409,4 +406,4 @@ If you would like to contribute to the project, please contact me.
 The source code can be used in a simple text editor or within Visual Studio using NodeJS Tools for Visual Studio. We recommend Visual Studio Code or Sublime Text!
 
 ### Who do I talk to? ###
-* Keith Jackson - keith@ministryotech.co.uk
+* Keith Jackson - keith@minotech.co.uk
